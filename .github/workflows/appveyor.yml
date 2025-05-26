@@ -1,16 +1,15 @@
 version: 1.0.{build}
 image: Visual Studio 2022
+build: off
 
 init:
   - ps: |
-      $token = $env:NGROK_AUTH_TOKEN
       Invoke-WebRequest https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip -OutFile ngrok.zip
       Expand-Archive ngrok.zip -DestinationPath .
-      .\ngrok\ngrok.exe authtoken $token
+      .\ngrok\ngrok.exe authtoken $env:NGROK_AUTH_TOKEN
       Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
       Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
       Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 1
       Set-LocalUser -Name "appveyor" -Password (ConvertTo-SecureString -AsPlainText "P@ssw0rd!" -Force)
       Start-Process .\ngrok\ngrok.exe -ArgumentList "tcp 3389" -WindowStyle Hidden
       Start-Sleep -Seconds 20
-build: off
